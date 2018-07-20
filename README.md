@@ -1,11 +1,26 @@
 
+<img src='docs/logo.png' width='128' height='128' />
+
 # Grid Styled
 
-Responsive React grid system built with [styled-components](https://github.com/styled-components/styled-components)
+Responsive React grid system built with
+[styled-system][], with support for
+[styled-components][sc] and
+[emotion][emotion]
 
-http://jxnblk.com/grid-styled
+https://jxnblk.com/grid-styled
 
-[![Build Status](https://travis-ci.org/jxnblk/grid-styled.svg?branch=master)](https://travis-ci.org/jxnblk/grid-styled)
+[![Build Status][badge]][travis]
+[![Downloads][downloads-badge]][npm]
+[![Version][version-badge]][npm]
+
+[badge]: https://img.shields.io/travis/jxnblk/grid-styled.svg?style=flat-square
+[travis]: https://travis-ci.org/jxnblk/grid-styled
+
+[downloads-badge]: https://img.shields.io/npm/dw/grid-styled.svg?style=flat-square
+[version-badge]: https://img.shields.io/npm/v/grid-styled.svg?style=flat-square
+[npm]: https://npmjs.com/package/grid-styled
+
 
 ## Getting Started
 
@@ -27,6 +42,12 @@ const App = () => (
     </Box>
   </Flex>
 )
+```
+
+*Or* for emotion, import `grid-styled/emotion`
+
+```js
+import { Flex, Box } from 'grid-styled/emotion'
 ```
 
 ```jsx
@@ -101,22 +122,15 @@ const App = () => (
 <Box mx={-2} />
 ```
 
-```jsx
-// Display inline-block grid
-import { Grid } from 'grid-styled'
-
-<div>
-  <Grid width={1/2}>Half</Grid>
-  <Grid width={1/2}>Half</Grid>
-</div>
-```
-
 
 ## `<Box />`
 
 The Box component handles width, margin and padding.
 
 ### Props
+
+All grid-styled components use [styled-system][] for style props,
+which pick up values from a [theme](#theming) and allow for responsive styles to be passed as [array values](#responsive-styles).
 
 #### `width` (number|string|array)
 
@@ -127,7 +141,7 @@ Pass an array to set different widths at different breakpoints for
 #### Margin and Padding Props
 
 Both margin and padding props accept numbers, strings, and arrays as values.
-Using a number from `0-4` will reference a step on the spacing scale.
+Using a number from `0-8` (i.e. an index of `theme.space`) will reference a step on the spacing scale.
 Larger numbers are converted to pixel values.
 Negative Numbers can be used to set negative margins and compensate for grid gutters.
 Strings are passed directly for other valid CSS values.
@@ -168,12 +182,27 @@ Sets the `order` property.
 <Box order={2} />
 ```
 
-#### `is` (Component|string)
+#### `alignSelf` (string|array)
 
-Sets the underlying HTML element.
+Sets the `align-self` property.
 
 ```jsx
-<Box is='section' />
+<Box alignSelf='flex-end' />
+```
+
+#### `css` (string|object)
+
+Pass styles to styled-components or emotion.
+This is useful as an escape hatch for one-off styles
+or as a way to extend Grid Styled components.
+
+```jsx
+<Box
+  bg='blue'
+  css={{
+    borderRadius: '4px'
+  }}
+/>
 ```
 
 ## `<Flex />`
@@ -181,17 +210,10 @@ Sets the underlying HTML element.
 The Flex component extends the Box component and sets display flex.
 It also includes the following props:
 
-- `align` (string|array) sets `align-items`
-- `justify` (string|array) sets `justify-content`
-- `direction` (string|array) sets `flex-direction`
-- `wrap` (boolean|array) sets `flex-wrap: wrap`
-- `column` (boolean) shortcut for `flex-direction: column`
-
-
-## `<Grid />`
-
-The Grid component extends the Box component and sets display inline-block
-for an alternative to flexbox layout.
+- `alignItems` (string|array) sets `align-items`
+- `justifyContent` (string|array) sets `justify-content`
+- `flexDirection` (string|array) sets `flex-direction`
+- `flexWrap` (string|array) sets `flex-wrap: wrap`
 
 
 ## Responsive Styles
@@ -199,13 +221,13 @@ for an alternative to flexbox layout.
 Most props accept arrays as values for mobile-first responsive styles,
 where the first value is for all breakpoints, then each value after is for a min-width
 media query from that breakpoint and up.
-The Box component uses [styled-system](https://github.com/jxnblk/styled-system) for these props.
+The Box component uses [styled-system][] for these props.
 
 ```jsx
 // 100% below the smallest breakpoint,
 // 50% from the next breakpoint and up,
 // and 25% from the next breakpoint and up
-<Box w={[ 1, 1/2, 1/4 ]} />
+<Box width={[ 1, 1/2, 1/4 ]} />
 
 // responsive margin
 <Box m={[ 1, 2, 3, 4 ]} />
@@ -216,13 +238,25 @@ The Box component uses [styled-system](https://github.com/jxnblk/styled-system) 
 
 ## Extending Components
 
-Using styled-components, you can customize any of the grid-styled components' styles.
-
+Component can be extended with React or using styled-components or emotion.
 
 ### InlineFlex
 
-```js
-// Example
+```jsx
+import React from 'react'
+import { Flex } from 'grid-styled'
+
+const InlineFlex = props =>
+  <Flex
+    {...props}
+    css={{
+      display: 'inline-flex'
+    }}
+  />
+```
+
+```jsx
+// styled-components example
 import styled from 'styled-components'
 import { Flex } from 'grid-styled'
 
@@ -233,22 +267,36 @@ const InlineFlex = styled(Flex)`
 
 ### Max-Width Container
 
+```jsx
+import React from 'react'
+import { Box } from 'grid-styled'
+
+const Container = props =>
+  <Box
+    {...props}
+    mx='auto'
+    css={{
+      maxWidth: '1024px'
+    }}
+  />
+```
+
 ```js
-// Example
+// styled-components example
 import styled from 'styled-components'
 import { Box } from 'grid-styled'
 
 const Container = styled(Box)`
   max-width: 1024px;
-  margin-left: auto;
-  margin-right: auto;
 `
+Container.defaultProps = {
+  mx: 'auto'
+}
 ```
 
 
 ### Auto Grid
 
-Components can also be extended with React.
 This example creates components for a grid with set gutters where the columns expand to fill in the space.
 
 ```jsx
@@ -272,49 +320,88 @@ const Column = props => (
 )
 ```
 
+## Changing the HTML element
+
+Grid Styled components use the [`is` prop][is-prop] from [system-components][] to change the underlying HTML element.
+
+```jsx
+<Box is='header' />
+```
+
 ## Theming
 
 Grid Styled uses smart defaults, but to customize the values,
-use styled-components’ `ThemeProvider` component.
+use the `ThemeProvider` component from styled-components or emotion.
+
 
 ```jsx
 import React from 'react'
 import { ThemeProvider } from 'styled-components'
+import { Box } from 'grid-styled'
+
+const theme = {
+  space: [ 0, 6, 12, 18, 24 ],
+  breakpoints: [ '32em', '48em', '64em' ]
+}
 
 const App = () => (
-  <ThemeProvider
-    theme={{
-      space: [ 0, 6, 12, 18, 24 ],
-      breakpoints: [ 32, 48, 64 ]
-    }}>
+  <ThemeProvider theme={theme}>
     <div>
-      <Grid>Grid with custom spacing scale and breakpoints</Grid>
+      <Box width={[1, 1/2, 1/4]} px={2}>Box with custom spacing scale and breakpoints</Box>
     </div>
   </ThemeProvider>
 )
 ```
 
-### Breakpoints
+**Breakpoints**
 
-The Grid component uses a mobile-first responsive approach,
+The Flex and Box components use a mobile-first responsive approach,
 where any value set works from that breakpoint and wider.
 Breakpoints are hard-coded to the following min-widths: `40em`, `52em`, `64em`.
 
-To customize, provide an array of numbers that will be converted to ems.
+To customize, provide an array of string values that will be converted to media queries.
 
-
-### Spacing Scale
+**Spacing Scale**
 
 Grid Styled components' margin and padding props use a 4 step spacing scale to help
 keep things aligned and keep layouts consistent.
 
-The default scale is based on an 8px/powers-of-two grid: `[ 0, 8, 16, 32, 64 ]`,
+The default scale is based on an 8px/powers-of-two grid: `[ 0, 4, 8, 16, 32, 64, 128, 256, 512 ]`,
 which helps keep spacing consistent and elements aligned even when nesting components.
 
-### Related
+## Styled Space
 
+Grid Styled also works with the optional [styled-space][] package.
+
+```jsx
+import React from 'react'
+import { Flex, Box } from 'grid-styled'
+import Space from 'styled-space'
+
+const App = () => (
+  <Flex>
+    <Space mx={3}>
+      <h1>Hello</h1>
+      <Box>Beep</Box>
+    </Space>
+  </Flex>
+)
+```
+
+## Related
+
+- [styled-space][]
+- [styled-system][]
+- [system-components][]
 - [Rebass](https://github.com/jxnblk/rebass)
-- [styled-system](https://github.com/jxnblk/styled-system)
-- [styled-components](https://github.com/styled-components/styled-components)
+- [styled-components][sc]
+- [emotion][emotion]
+
+[styled-space]: https://github.com/jxnblk/grid-styled/tree/master/styled-space
+[sc]: https://github.com/styled-components/styled-components
+[styled-system]: https://github.com/jxnblk/styled-system
+[emotion]: https://github.com/emotion-js/emotion
+[is-prop]: https://github.com/jxnblk/styled-system/tree/master/system-components#changing-the-underlying-html-element
+[system-components]: https://github.com/jxnblk/styled-system/tree/master/system-components
 
 [MIT License](LICENSE.md)

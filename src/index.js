@@ -1,7 +1,26 @@
-export { default as Box } from './Box'
-export { default as Grid } from './Grid'
-export { default as Flex } from './Flex'
-export { default as Half } from './Half'
-export { default as Third } from './Third'
-export { default as Quarter } from './Quarter'
-export { default as Golden } from './Golden'
+import system from 'system-components'
+
+export const Box = system({}, {
+  boxSizing: 'border-box'
+},
+  'width',
+  'space',
+  'fontSize',
+  'color',
+  'flex',
+  'order',
+  'alignSelf',
+)
+
+Box.displayName = 'Box'
+
+export const Flex = system({
+  is: Box
+}, { display: 'flex' },
+  'flexWrap',
+  'flexDirection',
+  'alignItems',
+  'justifyContent'
+)
+
+Flex.displayName = 'Flex'
